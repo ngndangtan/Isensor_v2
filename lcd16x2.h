@@ -7,11 +7,13 @@
 
 #ifndef LCD16X2_H_
 #define LCD16X2_H_
-
+#define USING_P2_FOR_LCD
 //Khai bao su dung LCD
 
 //#define USE_WAIT    0
 #define lcd_delay   500
+
+#ifdef USING_P1_FOR_LCD
 //Set PIN DATA
 #define DDRLCD      P1DIR
 #define PORTLCD     P1OUT
@@ -35,6 +37,33 @@
 #define PORT_RW     P1OUT
 #define PIN_RW      P1IN
 #define RW          0x04
+#endif
+
+#ifdef USING_P2_FOR_LCD
+//Set PIN DATA
+#define DDRLCD      P2DIR
+#define PORTLCD     P2OUT
+#define PINLCD      P2IN
+#define PRENLCD     P2REN
+#define PSELLCD     P2SEL
+#define PSEL2LCD    P2SEL2
+#define SHIFT_DATA  2       // vi tri dich trai so voi vi tri goc 0xF0
+//Set PIN RS
+#define DDR_RS      P2DIR
+#define PORT_RS     P2OUT
+#define PIN_RS      P2IN
+#define RS          0x01
+//Set PIN E
+#define DDR_E       P2DIR
+#define PORT_E      P2OUT
+#define PIN_E       P2IN
+#define E           0x02
+//Set PIN RW
+#define DDR_RW      P2DIR
+#define PORT_RW     P2OUT
+#define PIN_RW      P2IN
+#define RW          0x04
+#endif
 
 /* Chon kieu hien thi tang/giam, shift hoac khong shift */
 #define LCD_DEC_CUR_SHIFT_ON()  LCD_Command(0x05);

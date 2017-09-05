@@ -27,11 +27,11 @@ void delay_ms(unsigned int delay);          //Delay
 
 void I2C_Init(void)
 {
-    P1SEL |= SDA_PIN + SCL_PIN;                     // Assign I2C pins to USCI_B0
+    P1SEL|= SDA_PIN + SCL_PIN;                     // Assign I2C pins to USCI_B0
     P1SEL2|= SDA_PIN + SCL_PIN;
-    UCB0CTL1 = UCSWRST;                             // Enable SW reset, HOLD USCB in a reset state
-    UCB0CTL0 = UCMST + UCMODE_3 + UCSYNC;           // I2C Master, MODE 3 = I2C, synchronous mode
-    UCB0CTL1 = UCSSEL_2 + UCSWRST;                  // Use SMCLK, keep SW reset
+    UCB0CTL1= UCSWRST;                             // Enable SW reset, HOLD USCB in a reset state
+    UCB0CTL0= UCMST + UCMODE_3 + UCSYNC;           // I2C Master, MODE 3 = I2C, synchronous mode
+    UCB0CTL1= UCSSEL_2 + UCSWRST;                  // Use SMCLK, keep SW reset
     UCB0BR0 = 72;                                   // Set I2C master speed  72 gives approx 200Khz clock at 16Mhz
     UCB0BR1 = 0;                                    // Set I2C master speed
     UCB0CTL1 &= ~UCSWRST;                           // Clear SW reset, resume operation
