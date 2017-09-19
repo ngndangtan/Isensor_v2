@@ -2,6 +2,8 @@
 #ifndef I2C_H_
 #define I2C_H_
 #include    "msp430g2553.h"
+#define     DS1307_ADDRESS  0x68
+
 #define   SDA_PIN     BIT7      //Bit 7 USCI Port 1(SDA)
 #define   SCL_PIN     BIT6      //Bit 6 USCI Port 1(SCL)
 
@@ -10,10 +12,12 @@
 #define   ERR2      0x02
 #define   ERR3      0x03
 #define   ERR4      0x04
+#define   ERR5      0x05
 #define   TIME_OF_TRANSMITTER      5000//5ms
 #define   TIME_OF_RECEIVER      5000//5ms
 #define   TIME_OF_ACTIVE      5000//5ms
-
+#define   TIME_OF_SLAVE_ADDRESS_TRANSFER      5000//5ms
+#define   TIME_OF_STOP      5000//5ms
 
 
 void I2C_Init(void)
@@ -29,6 +33,14 @@ void I2C_Init(void)
     UCB0CTL1 &= ~UCSWRST;                           // Clear SW reset, resume operation
 
 }
+void I2C_Set_Address(unsigned char addr)
+{
+    UCB0CTL1 |= UCSWRST;
+    UCB0I2CSA = addr;                           // Set slave address
+    UCB0CTL1 &= ~UCSWRST;                       // Clear SW reset, resume operation
+
+}
+
 void delay_ms(unsigned int delay)
 {
     while (delay--)
@@ -81,11 +93,36 @@ char wait_active()
     int count;
     for(count=0;count<TIME_OF_ACTIVE;count++)
         {
-            if(!(UCB0STAT & UCBBUSY)) // waiting for slave address to transfer
+            if(!(UCB0STAT & UCBBUSY))
                 {
                     return E_OK;
                 }
         }
         return ERR4;
 }
+char wait_slave_address_transfer()
+{
+    int count;
+    for(count=0;count<TIME_OF_SLAVE_ADDRESS_TRANSFER;count++)
+        {
+            if(!(UCB0CTL1 & UCTXSTT)) // waiting for slave address to transfer
+                {
+                    return E_OK;
+                }
+        }
+        return ERR5;
+}
+char wait_stop()
+{
+    int count;
+    for(count=0;count<TIME_OF_STOP;count++)
+        {
+            if((UCB0STAT & UCSTPIFG) != UCSTPIFG) //wait for Stop condition to be set
+                {
+                    return E_OK;
+                }
+        }
+        return ERR5;
+}
+
 #endif /* I2C_H_ */

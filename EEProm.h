@@ -21,37 +21,23 @@ char I2C_Read_EEProm(unsigned char slave_address, unsigned int memory_address, c
     int address = memory_address; //EEprom memory starting address, this is different from the I2C slave address
     UCB0CTL1 &=~ UCTXNACK;
 
-    //while (UCB0STAT & UCBBUSY);         //wait for USCI B0 bus to be inactive
     check_temp=wait_active();
     if(check_temp!=E_OK) return check_temp;
     UCB0I2CSA = 0b1010000|(slave_address);          //set SLAVE address
     I2C_Start_Bit();                     //set USCI to be I2C TX,  send start condition
-    //UCB0TXBUF= 0b10100000|(slave_address<<1);
-    //while (UCB0CTL1 & UCTXSTT);                     // waiting for slave address to transfer
-    //while ((IFG2 & UCB0TXIFG) != UCB0TXIFG);        //wait for TX IFG to clear
-
     UCB0TXBUF = (address & 0xff00) >> 8;     //transfer memory_address MSB
-
     check_temp=wait_transmitter();
     if(check_temp!=E_OK) return check_temp;
-    //while (UCB0CTL1 & UCTXSTT);                     // waiting for slave address to transfer
-    //while ((IFG2 & UCB0TXIFG) != UCB0TXIFG);        //wait for TX IFG to clear
 
     UCB0TXBUF = (address & 0x00ff);          //transfer memory_address LSB
-
     check_temp=wait_transmitter();
     if(check_temp!=E_OK) return check_temp;
-    //while (UCB0CTL1 & UCTXSTT);                     // waiting for slave address to transfer
-    //while ((IFG2 & UCB0TXIFG) != UCB0TXIFG);        //wait for TX IFG to clear
 
     UCB0CTL1 &= ~UCTR;              //set USCI to be RECEIVER
     UCB0CTL1 |= UCTXSTT;            //send restart
     UCB0TXBUF= 0b10100001|(slave_address<<1);
-
     check_temp=wait_slave_address_transfer();
     if(check_temp!=E_OK) return check_temp;
-    //while (UCB0CTL1 & UCTXSTT);                     // waiting for slave address to transfer
-
 
     for (rLoop=0; rLoop<DataLength; rLoop++)    //receive loop
     {
@@ -63,7 +49,6 @@ char I2C_Read_EEProm(unsigned char slave_address, unsigned int memory_address, c
             {
                 UCB0CTL1 |= UCTXNACK; //generate a NACK
                 UCB0CTL1 |= UCTXSTP;  //generate a stop condition
-                //while (UCB0CTL1 & UCTXSTT);                     // waiting for slave address to transfer
                 check_temp=wait_slave_address_transfer();
                 if(check_temp!=E_OK) return check_temp;
             }
@@ -96,30 +81,20 @@ char I2C_Write_EEProm(unsigned char slave_address, unsigned int memory_address, 
 
     __disable_interrupt(); //prevent interrupts from messing with the I2C functions
 
-    //while (UCB0STAT & UCBBUSY);     //wait for USCI B0 bus to be inactive
+    UCB0I2CSA = 0b1010000|slave_address;          //set SLAVE address
     check_temp=wait_active();
     if(check_temp!=E_OK) return check_temp;
-
-    UCB0I2CSA = 0b1010000|slave_address;          //set SLAVE address
     for (NP=1; NP<=NumPages; NP++)
     {
 
         address = ((NP-1) * 128) + memory_address; //this is the full page start address
-        UCB0CTL1 |= UCTR + UCTXSTT;         //set USCI to be I2C TX,  send start condition
-        //UCB0TXBUF=0b10100000|(slave_address<<1);
-        //while (UCB0CTL1 & UCTXSTT);                 // waiting for slave address was transferred
-        //while ((IFG2 & UCB0TXIFG) != UCB0TXIFG);        //wait for TX IFG to clear
-
+        I2C_Start_Bit();
 
         UCB0TXBUF = (address & 0xff00) >> 8;        //transferring memory_address MSB
-        //while (UCB0CTL1 & UCTXSTT);                 // waiting for slave address was transferred
-        //while ((IFG2 & UCB0TXIFG) != UCB0TXIFG);        //wait for TX IFG to clear
         check_temp=wait_transmitter();
         if(check_temp!=E_OK) return check_temp;
 
         UCB0TXBUF = (address & 0x00ff);     //transferring memory_address LSB
-        //while (UCB0CTL1 & UCTXSTT);                 // waiting for slave address was transferred
-        //while ((IFG2 & UCB0TXIFG) != UCB0TXIFG);        //wait for TX IFG to clear
         check_temp=wait_transmitter();
         if(check_temp!=E_OK) return check_temp;
 
@@ -133,15 +108,12 @@ char I2C_Write_EEProm(unsigned char slave_address, unsigned int memory_address, 
         {
             UCB0TXBUF = data[((NP-1)*128)+offset];                   //send data.
             //UART_outdec(offset,0);
-            //while (UCB0CTL1 & UCTXSTT);                 // waiting for slave address was transferred
-            //while ((IFG2 & UCB0TXIFG) != UCB0TXIFG);        //wait for TX IFG to clear
             check_temp=wait_transmitter();
             if(check_temp!=E_OK) return check_temp;
         }
 
-        //UCB0CTL1 |= UCTXSTP;                    // set I2C stop condition
+
         I2C_Stop_Bit();
-        //while ((UCB0STAT & UCSTPIFG) == UCSTPIFG); //wait for Stop condition to be set
         check_temp=wait_stop();
         if(check_temp!=E_OK) return check_temp;
 

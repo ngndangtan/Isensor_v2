@@ -11,11 +11,13 @@ main.obj: D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/includ
 main.obj: D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/stdarg.h
 main.obj: ../lcd16x2.h
 main.obj: ../EEProm.h
+main.obj: ../i2c.h
 main.obj: ../UART.h
 main.obj: D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/stdlib.h
 main.obj: D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/ctype.h
 main.obj: D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/_isfuncdcl.h
 main.obj: ../DS1307.h
+main.obj: ../TC75.h
 
 ../main.c: 
 D:/00_software/ti/ccsv7/ccs_base/msp430/include/msp430.h: 
@@ -28,8 +30,10 @@ D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/linkage.
 D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/stdarg.h: 
 ../lcd16x2.h: 
 ../EEProm.h: 
+../i2c.h: 
 ../UART.h: 
 D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/stdlib.h: 
 D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/ctype.h: 
 D:/00_software/ti/ccsv7/tools/compiler/ti-cgt-msp430_16.9.3.LTS/include/_isfuncdcl.h: 
 ../DS1307.h: 
+../TC75.h: 

@@ -4,6 +4,7 @@
 #include "EEProm.h"
 #include "UART.h"
 #include "DS1307.h"
+#include "TC75.h"
 
 /**
  * main.c
@@ -54,6 +55,7 @@ int main(void)
          if(count++ ==1000)
          {
              count=0;
+             /*return E_OK;
              I2C_Read_EEProm(0x0,0x0a,buff_rx,10);
              UartCharPut(buff_rx[0]);
              UartCharPut(buff_rx[1]);
@@ -67,11 +69,12 @@ int main(void)
              UartCharPut(buff_rx[9]);
 
 
-             //buff_tx[4]++;
-             //I2C_Write_EEProm(0x0,0x00,buff_tx,5);
-             /*
+             buff_tx[9]++;
+             I2C_Write_EEProm(0x0,0x0a,buff_tx,10);
+*/
              Get_time_form_DS1307();
              UartCharPut(Times_st.Seconds);
+             /*
              UartCharPut(':');
              UartCharPut(Times_st.Minutes);
              UartCharPut(':');
