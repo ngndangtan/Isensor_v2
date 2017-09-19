@@ -1,27 +1,91 @@
-/*
- * i2c.h
- *
- *  Created on: Aug 4, 2017
- *      Author: thinhpc
- */
 
 #ifndef I2C_H_
 #define I2C_H_
+#include    "msp430g2553.h"
+#define   SDA_PIN     BIT7      //Bit 7 USCI Port 1(SDA)
+#define   SCL_PIN     BIT6      //Bit 6 USCI Port 1(SCL)
 
-//TCN75 Address
-#define TCN75_ADDRESS   0x90 // addr 0x48<<1 (include write bit)
-//#define TCN_CONF    0xE1
+#define   E_OK      0xFF
+#define   ERR1      0x01
+#define   ERR2      0x02
+#define   ERR3      0x03
+#define   ERR4      0x04
+#define   TIME_OF_TRANSMITTER      5000//5ms
+#define   TIME_OF_RECEIVER      5000//5ms
+#define   TIME_OF_ACTIVE      5000//5ms
 
-/*******************************
- *PROTOTYPE
- ******************************/
-extern void I2C_USCI_Init(unsigned char addr); // I2C initialize
-extern void I2C_USCI_Set_Address(unsigned char addr);  // Thay doi Sia chi Slave
-extern unsigned char I2C_USCI_Read_Byte(unsigned char address);    // Read 1 Byte
-extern unsigned char I2C_USCI_Read_Word(unsigned char Addr_Data,unsigned char *Data, unsigned char Length); //Read data word
-extern unsigned char I2C_USCI_Write_Byte(unsigned char address, unsigned char data);
-extern unsigned char I2C_USCI_Write_Word(unsigned char address, unsigned char pointer, unsigned char data);
-extern void I2C_Start_Bit(void);
-extern void I2C_Stop_Bit(void);
 
+
+void I2C_Init(void)
+{
+    P1SEL|= SDA_PIN + SCL_PIN;                     // Assign I2C pins to USCI_B0
+    P1SEL2|= SDA_PIN + SCL_PIN;
+    //P1REN|=SDA_PIN + SCL_PIN;
+    UCB0CTL1= UCSWRST;                             // Enable SW reset, HOLD USCB in a reset state
+    UCB0CTL0= UCMST + UCMODE_3 + UCSYNC;           // I2C Master, MODE 3 = I2C, synchronous mode
+    UCB0CTL1= UCSSEL_2 + UCSWRST;                  // Use SMCLK, keep SW reset
+    UCB0BR0 = 72;                                   // Set I2C master speed  72 gives approx 200Khz clock at 16Mhz
+    UCB0BR1 = 0;                                    // Set I2C master speed
+    UCB0CTL1 &= ~UCSWRST;                           // Clear SW reset, resume operation
+
+}
+void delay_ms(unsigned int delay)
+{
+    while (delay--)
+    {
+        __delay_cycles(1000);  //1ms = 1000 cycles per 1Mhz clock freq.
+    }
+}
+
+void I2C_Start_Bit(void)
+{
+    UCB0CTL1 |= UCTR + UCTXSTT;     // I2C as Transmitter, Generate START condition
+}
+
+void I2C_Stop_Bit(void)
+{
+    UCB0CTL1 |= UCTR + UCTXNACK+ UCTXSTP;     // I2C as Transmitter, Generate STOP condition
+}
+
+char wait_transmitter()
+{
+    int count;
+    for(count=0;count<TIME_OF_TRANSMITTER;count++)
+        {
+            if(!(UCB0CTL1 & UCTXSTT)) // waiting for slave address to transfer
+                {
+                for(count=0;count<TIME_OF_TRANSMITTER;count++)
+                    {
+                        if((IFG2 & UCB0TXIFG) == UCB0TXIFG) return E_OK; //wait for TX IFG to clear
+                    }
+                    return ERR2;
+                }
+        }
+        return ERR1;
+}
+
+char wait_receiver()
+{
+    int count;
+    for(count=0;count<TIME_OF_RECEIVER;count++)
+        {
+            if((IFG2 & UCB0RXIFG) == UCB0RXIFG) // waiting for slave address to transfer
+                {
+                    return E_OK;
+                }
+        }
+        return ERR3;
+}
+char wait_active()
+{
+    int count;
+    for(count=0;count<TIME_OF_ACTIVE;count++)
+        {
+            if(!(UCB0STAT & UCBBUSY)) // waiting for slave address to transfer
+                {
+                    return E_OK;
+                }
+        }
+        return ERR4;
+}
 #endif /* I2C_H_ */
