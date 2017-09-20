@@ -3,6 +3,8 @@
 #define I2C_H_
 #include    "msp430g2553.h"
 #define     DS1307_ADDRESS  0x68
+#define     TC75_ADDRESS    0x48|0x00
+#define     EEPROM_ADDRESS  0x50|0x00
 
 #define   SDA_PIN     BIT7      //Bit 7 USCI Port 1(SDA)
 #define   SCL_PIN     BIT6      //Bit 6 USCI Port 1(SCL)

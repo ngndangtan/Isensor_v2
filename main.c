@@ -35,8 +35,8 @@ int main(void)
     Uart_Init();
     I2C_Init();
 
-    temp=0x10;
-    I2C_DS1307_Write(DS1307_ADDRESS,DS1307_CONTROL_ADDRESS,&temp,1);
+    temp=00;
+    //I2C_DS1307_Write(DS1307_ADDRESS,DS1307_CONTROL_ADDRESS,&temp,1);
     buff_tx[0]=10;
     buff_tx[1]=9;
     buff_tx[2]=8;
@@ -47,14 +47,23 @@ int main(void)
     buff_tx[7]=3;
     buff_tx[8]=2;
     buff_tx[9]=1;
-    I2C_Write_EEProm(0x00,0x0a,buff_tx,10);
+    //I2C_Write_EEProm(EEPROM_ADDRESS,0x0a,buff_tx,10);
 
+    I2C_Write_TC75(TC75_ADDRESS,0x01,&temp,1);
     while(1)
      {
 
          if(count++ ==1000)
          {
              count=0;
+
+             I2C_Read_TC75(TC75_ADDRESS,0x00,buff_rx,2);
+             UartCharPut((int)(buff_rx[0]));
+             UartCharPut(':');
+             UartCharPut((int)(buff_rx[1]));
+             UartCharPut('\r');
+             UartCharPut('\n');
+
              /*return E_OK;
              I2C_Read_EEProm(0x0,0x0a,buff_rx,10);
              UartCharPut(buff_rx[0]);
@@ -72,9 +81,10 @@ int main(void)
              buff_tx[9]++;
              I2C_Write_EEProm(0x0,0x0a,buff_tx,10);
 */
+             /*
              Get_time_form_DS1307();
              UartCharPut(Times_st.Seconds);
-             /*
+
              UartCharPut(':');
              UartCharPut(Times_st.Minutes);
              UartCharPut(':');

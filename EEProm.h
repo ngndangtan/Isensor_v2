@@ -6,9 +6,9 @@
 
 /*******************************************************************************************/
 char I2C_Write_EEProm(unsigned char slave_address, unsigned int register_address, char * data, unsigned char DataLength );
-char I2C_Read_EEProm(unsigned char slave_address, unsigned int memory_address, char * data, unsigned char DataLength );
+char I2C_Read_EEProm(unsigned char slave_address, unsigned int register_address, char * data, unsigned char DataLength );
 
-char I2C_Read_EEProm(unsigned char slave_address, unsigned int memory_address, char * data, unsigned char DataLength )
+char I2C_Read_EEProm(unsigned char slave_address, unsigned int register_address, char * data, unsigned char DataLength )
 { //Reading from a 24LCxxx series is much easier then writing.  Reading doesn't have to be done in 64 byte pages.
     /*
          * Todo:
@@ -18,12 +18,12 @@ char I2C_Read_EEProm(unsigned char slave_address, unsigned int memory_address, c
          */
     char check_temp;
     int rLoop = 0;  //loop counter
-    int address = memory_address; //EEprom memory starting address, this is different from the I2C slave address
+    int address = register_address; //EEprom memory starting address, this is different from the I2C slave address
     UCB0CTL1 &=~ UCTXNACK;
 
     check_temp=wait_active();
     if(check_temp!=E_OK) return check_temp;
-    UCB0I2CSA = 0b1010000|(slave_address);          //set SLAVE address
+    UCB0I2CSA = slave_address;          //set SLAVE address
     I2C_Start_Bit();                     //set USCI to be I2C TX,  send start condition
     UCB0TXBUF = (address & 0xff00) >> 8;     //transfer memory_address MSB
     check_temp=wait_transmitter();
@@ -35,7 +35,7 @@ char I2C_Read_EEProm(unsigned char slave_address, unsigned int memory_address, c
 
     UCB0CTL1 &= ~UCTR;              //set USCI to be RECEIVER
     UCB0CTL1 |= UCTXSTT;            //send restart
-    UCB0TXBUF= 0b10100001|(slave_address<<1);
+    UCB0TXBUF =(slave_address<<1)|0x01;
     check_temp=wait_slave_address_transfer();
     if(check_temp!=E_OK) return check_temp;
 
